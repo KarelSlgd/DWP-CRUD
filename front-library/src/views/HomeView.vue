@@ -220,15 +220,16 @@ export default {
   },
   methods: {
     search() {
-      let dateInit = moment(this.searchDateInit)
-        .format("DD-MM-YYYY")
-        .replace(/-/g, "");
-      let dateEnd = moment(this.searchDateEnd)
-        .format("DD-MM-YYYY")
-        .replace(/-/g, "");
-      console.log(
-        `http://localhost:8080/api/book/query?name=${this.searchName}&author=${this.searchAuthor}&genre=${this.searchGenre}&startYear=${dateInit}&endYear=${dateEnd}`
-      );
+      let dateInit = "";
+      let dateEnd = "";
+      if (this.searchDateInit && this.searchDateEnd) {
+        dateInit = moment(this.searchDateInit)
+          .format("DD-MM-YYYY")
+          .replace(/-/g, "");
+        dateEnd = moment(this.searchDateEnd)
+          .format("DD-MM-YYYY")
+          .replace(/-/g, "");
+      }
       fetch(
         `http://localhost:8080/api/book/query?name=${this.searchName}&author=${this.searchAuthor}&genre=${this.searchGenre}&startYear=${dateInit}&endYear=${dateEnd}`
       )
@@ -240,7 +241,6 @@ export default {
           return response.json();
         })
         .then((data) => {
-          console.log(data.data);
           data.data.forEach((book) => {
             book.year = new Date(book.year).toLocaleDateString();
           });
