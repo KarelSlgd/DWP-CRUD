@@ -48,6 +48,112 @@
           >
         </b-col>
       </b-row>
+      <b-row v-if="showCreate">
+        <div>
+          <div
+            class="drop-zone"
+            @drop="onDrop($event, 1)"
+            @dragover.prevent
+            @dragenter.prevent
+          >
+            <h3 class="m-4 text-center">
+              Arrastra para agregar tu libro favorito
+            </h3>
+            <div
+              v-for="item in listOne"
+              :key="item.title"
+              class="drag-el"
+              draggable
+              @dragstart="startDrag($event, item)"
+            >
+              <b-form>
+                <div class="d-flex justify-content-end">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="60"
+                    height="60"
+                    viewBox="0 0 24 24"
+                    style="fill: rgba(0, 0, 0, 1); transform: ; msfilter: "
+                  >
+                    <path
+                      d="M19.221 10.803 12 10V4a2 2 0 0 0-4 0v12l-3.031-1.212a2 2 0 0 0-2.64 1.225l-.113.34a.998.998 0 0 0 .309 1.084l5.197 4.332c.179.149.406.231.64.231H19a2 2 0 0 0 2-2v-7.21a2 2 0 0 0-1.779-1.987z"
+                    ></path>
+                  </svg>
+                </div>
+                <b-row>
+                  <b-input-group prepend="Nombre" class="mt-2">
+                    <b-form-input
+                      id="name"
+                      v-model="form.name"
+                      type="text"
+                      required
+                    ></b-form-input>
+                  </b-input-group>
+                </b-row>
+                <b-row>
+                  <b-input-group prepend="Autor" class="mt-3">
+                    <b-form-input
+                      id="author"
+                      v-model="form.author"
+                      type="text"
+                      required
+                    ></b-form-input>
+                  </b-input-group>
+                </b-row>
+                <b-row>
+                  <b-input-group prepend="Genero" class="mt-3">
+                    <b-form-input
+                      id="genre"
+                      v-model="form.genre"
+                      type="text"
+                      required
+                    ></b-form-input>
+                  </b-input-group>
+                </b-row>
+                <b-row>
+                  <b-input-group prepend="Fecha de publicación" class="mt-3">
+                    <b-form-input
+                      id="year"
+                      v-model="form.year"
+                      type="date"
+                      required
+                    ></b-form-input>
+                  </b-input-group>
+                </b-row>
+              </b-form>
+            </div>
+          </div>
+          <div
+            class="drop-zone"
+            @drop="onDrop($event, 2)"
+            @dragover.prevent
+            @dragenter.prevent
+          >
+            <div
+              v-for="item in listTwo"
+              :key="item.title"
+              class="drag-el"
+              draggable
+              @dragstart="startDrag($event, item)"
+            >
+              <div class="d-flex justify-content-end">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="60"
+                  height="60"
+                  viewBox="0 0 24 24"
+                  style="fill: rgba(0, 0, 0, 1); transform: ; msfilter: "
+                >
+                  <path
+                    d="M20 3h-7.21a2 2 0 0 0-1.987 1.779L10 12H4a2 2 0 0 0 0 4h12l-1.212 3.03a2.001 2.001 0 0 0 1.225 2.641l.34.113a.998.998 0 0 0 1.084-.309l4.332-5.197c.149-.179.231-.406.231-.64V5a2 2 0 0 0-2-2z"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="mb-3 text-center">{{ message }}</h3>
+            </div>
+          </div>
+        </div>
+      </b-row>
     </b-container>
     <b-modal
       id="modal-center"
@@ -117,7 +223,7 @@
       <p>No se encontraron libros.</p>
     </div>
     <div v-else>
-      <b-container>
+      <b-container class="mt-4">
         <b-row>
           <b-col
             md="4"
@@ -130,7 +236,8 @@
             <b-card
               :title="book.name"
               style="background-color: #fcfcfc"
-              class="mb-2"
+              class="mb-2 animate__animated animate__swing"
+              :key="book.id"
             >
               <b-card-text>
                 <b>Autor:</b> {{ book.author }}
@@ -196,6 +303,7 @@
 
 <script>
 import moment from "moment";
+
 export default {
   data() {
     return {
@@ -213,12 +321,62 @@ export default {
       books: [],
       show: true,
       editing: false,
+      items: [
+        {
+          id: 1,
+          list: 1,
+        },
+        {
+          id: 2,
+          list: 2,
+        },
+      ],
+      message: "Suelta aquí para agregar",
+      showCreate: true,
+      lastScrollPosition: 0,
     };
   },
   mounted() {
     this.findAll();
+    window.addEventListener("scroll", this.onScroll);
+  },
+  beforeDestroy() {
+    window.removeEventListener("scroll", this.onScroll);
+  },
+
+  computed: {
+    listOne() {
+      return this.items.filter((item) => item.list === 1);
+    },
+    listTwo() {
+      return this.items.filter((item) => item.list === 2);
+    },
   },
   methods: {
+    onScroll() {
+      const currentScrollPosition =
+        window.pageYOffset || document.documentElement.scrollTop;
+
+      if (Math.abs(currentScrollPosition - this.lastScrollPosition) < 700) {
+        return;
+      }
+      this.showCreate = currentScrollPosition < this.lastScrollPosition;
+      this.lastScrollPosition = currentScrollPosition;
+    },
+    startDrag(evt, item) {
+      evt.dataTransfer.dropEffect = "move";
+      evt.dataTransfer.effectAllowed = "move";
+      evt.dataTransfer.setData("itemID", item.id);
+    },
+    onDrop(evt, zone) {
+      if (zone === 2) {
+        if (!this.validateForm()) {
+          return;
+        }
+        this.createBook();
+      }
+    },
+
     search() {
       let dateInit = "";
       let dateEnd = "";
@@ -262,6 +420,18 @@ export default {
       }
     },
     validateForm() {
+      if (!this.form.name) {
+        alert("Ingresa el nombre del libro");
+        return false;
+      }
+      if (!this.form.author) {
+        alert("Ingresa el autor del libro");
+        return false;
+      }
+      if (!this.form.genre) {
+        alert("Ingresa el género del libro");
+        return false;
+      }
       if (this.form.year < 1000 || this.form.year > new Date().getFullYear()) {
         alert("Ingresa un año válido");
         return false;
@@ -320,6 +490,7 @@ export default {
             this.form.author = "";
             this.form.genre = "";
             this.form.year = null;
+            this.message = "Suelta aquí para agregar";
           } else {
             console.error(data.data.message);
           }
@@ -398,4 +569,16 @@ export default {
 </script>
 
 <style>
+.drop-zone {
+  background-color: #c5c4c4;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.drag-el {
+  background-color: #fcfcfc;
+  border-radius: 10px;
+  padding: 5px;
+}
 </style>
