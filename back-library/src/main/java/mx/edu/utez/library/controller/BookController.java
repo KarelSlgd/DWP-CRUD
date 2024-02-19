@@ -1,6 +1,6 @@
 package mx.edu.utez.library.controller;
 
-import mx.edu.utez.library.CustomResponse;
+import mx.edu.utez.library.utils.Response;
 import mx.edu.utez.library.model.Book;
 import mx.edu.utez.library.model.BookDto;
 import mx.edu.utez.library.service.BookService;
@@ -9,6 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -20,7 +24,7 @@ public class BookController {
     private BookService libroService;
 
     @GetMapping("/")
-    public ResponseEntity<CustomResponse<List<Book>>> getAll() {
+    public ResponseEntity<Response<List<Book>>> getAll() {
         return new ResponseEntity<>(
                 this.libroService.getAll(),
                 HttpStatus.OK
@@ -28,7 +32,7 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CustomResponse<Book>> getById(
+    public ResponseEntity<Response<Book>> getById(
             @PathVariable("id")
             Integer id) {
         return new ResponseEntity<>(
@@ -37,8 +41,34 @@ public class BookController {
         );
     }
 
+    @GetMapping("/query")
+    public ResponseEntity<Response<List<Book>>> queryMethod(
+            @RequestParam String name,
+            @RequestParam String author,
+            @RequestParam String genre,
+            @RequestParam String startYear,
+            @RequestParam String endYear) throws ParseException {
+        SimpleDateFormat inputFormat = new SimpleDateFormat("ddMMyyyy");
+        SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        Date startDate = null;
+        Date endDate = null;
+        if (!startYear.isEmpty()) {
+            Date parsedStartDate = inputFormat.parse(startYear);
+            startDate = outputFormat.parse(outputFormat.format(parsedStartDate));
+        }
+        if (!endYear.isEmpty()) {
+            Date parsedEndDate = inputFormat.parse(endYear);
+            endDate = outputFormat.parse(outputFormat.format(parsedEndDate));
+        }
+        return new ResponseEntity<>(
+                this.libroService.queryMethod(name, author, genre, startDate, endDate),
+                HttpStatus.OK
+        );
+    }
+
     @PostMapping("/")
-    public ResponseEntity<CustomResponse<Book>> insert(@RequestBody BookDto book) {
+    public ResponseEntity<Response<Book>> insert(@RequestBody BookDto book) {
         return new ResponseEntity<>(
                 this.libroService.insert(book.getLibro()), HttpStatus.CREATED
         );
@@ -46,7 +76,7 @@ public class BookController {
 
 
     @PutMapping("/")
-    public ResponseEntity<CustomResponse<Book>> update(@RequestBody BookDto bk) {
+    public ResponseEntity<Response<Book>> update(@RequestBody BookDto bk) {
         Book book = bk.getLibro();
         return new ResponseEntity<>(
                 this.libroService.update(book), HttpStatus.OK
@@ -54,7 +84,7 @@ public class BookController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<CustomResponse<Boolean>> delete(@PathVariable Integer id) {
+    public ResponseEntity<Response<Boolean>> delete(@PathVariable Integer id) {
         return new ResponseEntity<>(
                 this.libroService.delete(id),
                 HttpStatus.OK

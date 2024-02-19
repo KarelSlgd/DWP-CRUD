@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
@@ -14,7 +16,7 @@ public class BookDto {
     private String name;
     private String author;
     private String genre;
-    private Integer year;
+    private Date year;
 
 
     public Book getLibro() {

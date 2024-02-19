@@ -1,6 +1,6 @@
 package mx.edu.utez.library.service;
 
-import mx.edu.utez.library.CustomResponse;
+import mx.edu.utez.library.utils.Response;
 import mx.edu.utez.library.model.Book;
 import mx.edu.utez.library.model.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -17,8 +18,8 @@ public class BookService {
     private BookRepository bookRepository;
 
     @Transactional(readOnly = true)
-    public CustomResponse<List<Book>> getAll() {
-        return new CustomResponse<>(
+    public Response<List<Book>> getAll() {
+        return new Response<>(
                 this.bookRepository.findAll(),
                 false,
                 200,
@@ -28,8 +29,8 @@ public class BookService {
 
 
     @Transactional(readOnly = true)
-    public CustomResponse<Book> getOne(Integer id) {
-        return new CustomResponse<>(
+    public Response<Book> getOne(Integer id) {
+        return new Response<>(
                 this.bookRepository.findById(id).orElse(null),
                 false,
                 200,
@@ -39,8 +40,8 @@ public class BookService {
 
 
     @Transactional(rollbackFor = {SQLException.class})
-    public CustomResponse<Book> insert(Book libro) {
-           return new CustomResponse<>(
+    public Response<Book> insert(Book libro) {
+           return new Response<>(
                     this.bookRepository.save(libro),
                     false,
                     200,
@@ -49,16 +50,16 @@ public class BookService {
     }
 
     @Transactional(rollbackFor = {SQLException.class})
-    public CustomResponse<Book> update(Book libro) {
+    public Response<Book> update(Book libro) {
         if (this.bookRepository.existsById(libro.getId())) {
-            return new CustomResponse<>(
+            return new Response<>(
                     this.bookRepository.save(libro),
                     false,
                     200,
                     "Libro actualizado correctamente"
             );
         } else {
-            return new CustomResponse<>(
+            return new Response<>(
                     null,
                     true,
                     400,
@@ -68,17 +69,17 @@ public class BookService {
     }
 
     @Transactional(rollbackFor = {SQLException.class})
-    public CustomResponse<Boolean> delete(Integer id) {
+    public Response<Boolean> delete(Integer id) {
         if (this.bookRepository.existsById(id)) {
             this.bookRepository.deleteById(id);
-            return new CustomResponse<>(
+            return new Response<>(
                     true,
                     false,
                     200,
                     "Libro eliminado correctamente"
             );
         } else {
-            return new CustomResponse<>(
+            return new Response<>(
                     false,
                     true,
                     400,
@@ -86,5 +87,18 @@ public class BookService {
             );
         }
     }
-
+    @Transactional(readOnly = true)
+    public Response<List<Book>> queryMethod(String name, String author, String genre, Date startYear, Date endYear) {
+        if (name != null && !name.isEmpty()) {
+                return new Response<>(bookRepository.findByNameContainingIgnoreCase(name), false, 200, "Encontrado");
+        } else if (author != null && !author.isEmpty()) {
+            return new Response<>(bookRepository.findByAuthorContainingIgnoreCase(author), false, 200, "Encontrado");
+        } else if (genre != null && !genre.isEmpty()) {
+            return new Response<>(bookRepository.findByGenreContainingIgnoreCase(genre), false, 200, "Encontrado");
+        } else if (startYear != null && endYear != null) {
+            return new Response<>(bookRepository.findByYearBetween(startYear, endYear), false, 200, "Encontrado");
+        } else {
+            return new Response<>(bookRepository.findAll(), false, 200, "Encontrado");
+        }
+    }
 }

@@ -1,112 +1,135 @@
 <template>
   <div>
-    <div>
-      <b-row>
+    <b-container>
+      <b-row class="mb-3">
         <b-col cols="10">
-          <h1 class="text-center">Libros</h1>
+          <h1>Libros</h1>
         </b-col>
-        <b-col>
-          <b-button
-            variant="primary"
-            v-b-modal.modal-center
-            class="btn-lg float-right"
+        <b-col cols="2">
+          <b-button variant="primary" v-b-modal.modal-center style="width: 100%"
             >Crear</b-button
           >
         </b-col>
       </b-row>
-      <b-row>
-        <b-modal
-          id="modal-center"
-          hide-footer
-          :title="editing ? 'Editar libro' : 'Crear libro'"
-        >
-          <div>
-            <b-form @submit="onSubmit" @reset="onReset" v-if="show">
-              <b-row>
-                <b-form-group
-                  id="input-group-name"
-                  label="Nombre"
-                  label-for="name"
-                >
-                  <b-form-input
-                    id="name"
-                    v-model="form.name"
-                    type="text"
-                    required
-                  ></b-form-input>
-                </b-form-group>
-              </b-row>
-              <b-row class="mt-3">
-                <b-form-group
-                  id="input-group-author"
-                  label="Autor"
-                  label-for="author"
-                >
-                  <b-form-input
-                    id="author"
-                    v-model="form.author"
-                    type="text"
-                    required
-                  ></b-form-input>
-                </b-form-group>
-              </b-row>
-              <b-row class="mt-3">
-                <b-form-group
-                  id="input-group-genre"
-                  label="Genero"
-                  label-for="genre"
-                >
-                  <b-form-input
-                    id="genre"
-                    v-model="form.genre"
-                    type="text"
-                    required
-                  ></b-form-input>
-                </b-form-group>
-              </b-row>
-              <b-row class="mt-3">
-                <b-form-group
-                  id="input-group-year"
-                  label="Año"
-                  label-for="year"
-                >
-                  <b-form-input
-                    id="year"
-                    v-model="form.year"
-                    type="number"
-                    required
-                  ></b-form-input>
-                </b-form-group>
-              </b-row>
-              <div class="d-flex justify-content-end mt-3">
-                <b-button class="me-1" type="reset" variant="danger"
-                  >Limpiar</b-button
-                >
-                <b-button type="submit" variant="primary">Aceptar</b-button>
-              </div>
-            </b-form>
-          </div>
-        </b-modal>
+      <b-row class="mb-5">
+        <h5>Filtro de búsqueda</h5>
+        <b-col cols="12" class="mb-3">
+          <label for="example-datepicker">Nombre</label>
+          <b-form-input id="search" v-model="searchName"></b-form-input>
+        </b-col>
+        <b-col cols="12" class="mb-3">
+          <label for="example-datepicker">Autor</label>
+          <b-form-input id="search" v-model="searchAuthor"></b-form-input>
+        </b-col>
+
+        <b-col class="mb-3">
+          <label for="example-datepicker">Fecha de inicio</label>
+          <b-form-datepicker
+            id="example-datepicker"
+            v-model="searchDateInit"
+            class="mb-2"
+          ></b-form-datepicker>
+        </b-col>
+        <b-col class="mb-3">
+          <label for="example-datepicker">Fecha de fin</label>
+          <b-form-datepicker
+            id="example-datepicker"
+            v-model="searchDateEnd"
+            class="mb-2"
+          ></b-form-datepicker>
+        </b-col>
+        <b-col cols="12" class="mb-3">
+          <label for="example-datepicker">Genero</label>
+          <b-form-input id="search" v-model="searchGenre"></b-form-input>
+        </b-col>
+        <b-col cols="12" class="mb-3">
+          <b-button variant="primary" style="width: 100%" @click="search()"
+            >Buscar</b-button
+          >
+        </b-col>
       </b-row>
-    </div>
+    </b-container>
+    <b-modal
+      id="modal-center"
+      hide-footer
+      :title="editing ? 'Editar libro' : 'Crear libro'"
+    >
+      <div>
+        <b-form @submit="onSubmit" @reset="onReset" v-if="show">
+          <b-row>
+            <b-form-group id="input-group-name" label="Nombre" label-for="name">
+              <b-form-input
+                id="name"
+                v-model="form.name"
+                type="text"
+                required
+              ></b-form-input>
+            </b-form-group>
+          </b-row>
+          <b-row class="mt-3">
+            <b-form-group
+              id="input-group-author"
+              label="Autor"
+              label-for="author"
+            >
+              <b-form-input
+                id="author"
+                v-model="form.author"
+                type="text"
+                required
+              ></b-form-input>
+            </b-form-group>
+          </b-row>
+          <b-row class="mt-3">
+            <b-form-group
+              id="input-group-genre"
+              label="Genero"
+              label-for="genre"
+            >
+              <b-form-input
+                id="genre"
+                v-model="form.genre"
+                type="text"
+                required
+              ></b-form-input>
+            </b-form-group>
+          </b-row>
+          <b-row class="mt-3">
+            <b-form-group id="input-group-year" label="Año" label-for="year">
+              <b-form-input
+                id="year"
+                v-model="form.year"
+                type="date"
+                required
+              ></b-form-input>
+            </b-form-group>
+          </b-row>
+          <div class="d-flex justify-content-end mt-3">
+            <b-button class="me-1" type="reset" variant="danger"
+              >Limpiar</b-button
+            >
+            <b-button type="submit" variant="primary">Aceptar</b-button>
+          </div>
+        </b-form>
+      </div>
+    </b-modal>
     <div v-if="books.length === 0" class="m-5">
       <p>No se encontraron libros.</p>
     </div>
     <div v-else>
-      <div class="ms-5 mt-5">
-        <div class="row">
-          <div
+      <b-container>
+        <b-row>
+          <b-col
+            md="4"
+            sm="6"
+            cols="12"
             v-for="(book, index) in books"
             :key="index"
-            class="col-md-3 mb-4"
+            class="mb-4"
           >
             <b-card
               :title="book.name"
-              img-src="https://www.enago.com/academy/wp-content/uploads/2021/12/BookChapter-750x340.jpg"
-              img-alt="Book Image"
-              img-top
-              tag="article"
-              style="max-width: 20rem; background-color: #fcfcfc"
+              style="background-color: #fcfcfc"
               class="mb-2"
             >
               <b-card-text>
@@ -164,14 +187,15 @@
                 </b-button>
               </div>
             </b-card>
-          </div>
-        </div>
-      </div>
+          </b-col>
+        </b-row>
+      </b-container>
     </div>
   </div>
 </template>
 
 <script>
+import moment from "moment";
 export default {
   data() {
     return {
@@ -181,6 +205,11 @@ export default {
         genre: "",
         year: null,
       },
+      searchName: "",
+      searchAuthor: "",
+      searchGenre: "",
+      searchDateInit: "",
+      searchDateEnd: "",
       books: [],
       show: true,
       editing: false,
@@ -190,6 +219,37 @@ export default {
     this.findAll();
   },
   methods: {
+    search() {
+      let dateInit = moment(this.searchDateInit)
+        .format("DD-MM-YYYY")
+        .replace(/-/g, "");
+      let dateEnd = moment(this.searchDateEnd)
+        .format("DD-MM-YYYY")
+        .replace(/-/g, "");
+      console.log(
+        `http://localhost:8080/api/book/query?name=${this.searchName}&author=${this.searchAuthor}&genre=${this.searchGenre}&startYear=${dateInit}&endYear=${dateEnd}`
+      );
+      fetch(
+        `http://localhost:8080/api/book/query?name=${this.searchName}&author=${this.searchAuthor}&genre=${this.searchGenre}&startYear=${dateInit}&endYear=${dateEnd}`
+      )
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Error al obtener los libros");
+          }
+          0;
+          return response.json();
+        })
+        .then((data) => {
+          console.log(data.data);
+          data.data.forEach((book) => {
+            book.year = new Date(book.year).toLocaleDateString();
+          });
+          this.books = data.data;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
     onSubmit(event) {
       event.preventDefault();
       if (!this.validateForm()) {
@@ -229,6 +289,9 @@ export default {
           return response.json();
         })
         .then((data) => {
+          data.data.forEach((book) => {
+            book.year = moment(book.year).format("DD-MM-YYYY");
+          });
           this.books = data.data;
         })
         .catch((error) => {

@@ -1,4 +1,4 @@
-package mx.edu.utez.library;
+package mx.edu.utez.library.utils;
 
 
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 @Getter
-public class CustomResponse <T>{
+public class Response<T>{
     T data;
     Boolean error;
     int StatusCode;
